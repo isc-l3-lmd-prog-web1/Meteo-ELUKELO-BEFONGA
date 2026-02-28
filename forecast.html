@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WeatherHub - Prévisions</title>
+<style>
+body{font-family:'Segoe UI', sans-serif;margin:0;padding:0;background:#fff3e0;color:#333;}
+header, footer{background:#ef6c00;color:white;padding:15px;text-align:center;}
+nav a{margin:0 10px;color:white;text-decoration:none;font-weight:bold;}
+.container{padding:20px;text-align:center;}
+input, button{padding:10px;margin:5px;font-size:16px;}
+.forecast-day{border:1px solid #ccc;padding:10px;margin:10px;display:inline-block;width:150px;}
+@media(max-width:600px){.forecast-day{width:90%;margin:10px 0;}}
+</style>
+</head>
+<body>
+<header>
+<h1>Prévisions 5 jours 🌤️</h1>
+<nav>
+<a href="index.html">Accueil</a>
+<a href="local.html">Météo locale</a>
+<a href="forecast.html">Prévisions</a>
+<a href="map.html">Carte</a>
+<a href="about.html">À propos</a>
+</nav>
+</header>
+
+<div class="container">
+  <h2>Entrez une ville pour voir les prévisions</h2>
+  <input type="text" id="cityForecast" placeholder="Ville">
+  <button onclick="getForecast()">Voir prévisions</button>
+  <div id="forecastResult"></div>
+</div>
+
+<footer>&copy; 2026 WeatherHub</footer>
+
+<script>
+async function getForecast(){
+  const city = document.getElementById('cityForecast').value;
+  if(!city){alert('Entrez une ville');return;}
+  const apiKey='YOUR_API_KEY';
+  const url=`https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&lang=fr&appid=${apiKey}`;
+  try{
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('Ville non trouvée');
+    const data = await res.json();
+    const days = {};
+    data.list.forEach(item=>{
+      const date = item.dt_txt.split(' ')[0];
+      if(!days[date]) days[date] = item;
+    });
+    let html='';
+    for(const date in days){
+      const d = days[date];
+      html+=`<div class="forecast-day">
+        <h4>${date}</h4>
+        <p>${d.weather[0].description}</p>
+        <p>🌡️ ${d.main.temp} °C</p>
+        <p>💧 ${d.main.humidity}%</p>
+      </div>`;
+    }
+    document.getElementById('forecastResult').innerHTML=html;
+  }catch(err){document.getElementById('forecastResult').innerHTML=`<p>${err.message}</p>`;}
+}
+</script>
+</body>
+</html>
